@@ -1,5 +1,6 @@
 require('dotenv').config();
 const express = require('express');
+const path = require('path');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
@@ -10,7 +11,7 @@ connectDB();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(helmet());
+app.use(helmet({ contentSecurityPolicy: false }));
 
 app.use(cors({
   origin: process.env.ALLOWED_ORIGIN || 'http://localhost:5173',
@@ -37,8 +38,17 @@ app.use('/api/rescue', require('./routes/rescueRoutes'));
 app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/assistant', require('./routes/assistantRoutes'));
 
-app.get('/', (req, res) => {
-  res.send('Deadline Guardian API is running');
+// Serve frontend static files in production
+const frontendBuildPath = path.join(__dirname, '../frontend/dist');
+app.use(express.static(frontendBuildPath));
+
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
+
+// Catch-all route to serve React app for non-API requests
+app.get('*', (req, res) => {
+  res.sendFile(path.join(frontendBuildPath, 'index.html'));
 });
 
 app.listen(PORT, () => {

@@ -6,7 +6,7 @@ import TaskForm from '../TaskForm';
 
 export default function TasksTab({ tasks, fetchDashboardData }) {
   const [nowDate, setNowDate] = useState(new Date());
-  const [filters, setFilters] = useState({ status: 'active', risk: 'all', timeframe: 'all' });
+  const [filters, setFilters] = useState({ status: 'active', risk: 'all', timeframe: 'all', category: 'all', searchQuery: '' });
   const [showTaskForm, setShowTaskForm] = useState(false);
   const [expandedTaskId, setExpandedTaskId] = useState(null);
 
@@ -90,6 +90,12 @@ export default function TasksTab({ tasks, fetchDashboardData }) {
       if (filters.timeframe === 'tomorrow' && deadline.getTime() !== tomorrow.getTime()) return false;
       if (filters.timeframe === 'week' && (deadline < today || deadline > nextWeek)) return false;
 
+      // Category Filter
+      if (filters.category !== 'all' && (t.category || 'Work').toLowerCase() !== filters.category.toLowerCase()) return false;
+
+      // Search Filter
+      if (filters.searchQuery && !t.title.toLowerCase().includes(filters.searchQuery.toLowerCase())) return false;
+
       return true;
     });
   };
@@ -121,9 +127,32 @@ export default function TasksTab({ tasks, fetchDashboardData }) {
 
       <div className="bg-surface rounded-2xl shadow-sm border border-border overflow-hidden">
         <div className="p-6 border-b border-border flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
-          <h2 className="text-lg font-bold shrink-0">Advanced Filters</h2>
+          <h2 className="text-lg font-bold shrink-0 hidden lg:block">Filters</h2>
+          
+          <div className="w-full lg:w-64 shrink-0">
+            <input 
+              type="text" 
+              placeholder="Search tasks..." 
+              value={filters.searchQuery}
+              onChange={(e) => setFilters({...filters, searchQuery: e.target.value})}
+              className="w-full bg-bg border border-border text-sm rounded-lg px-4 py-2 text-text focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+            />
+          </div>
+
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full lg:w-auto justify-between lg:justify-end">
             <div className="flex flex-wrap items-center gap-2">
+              <select 
+                value={filters.category} 
+                onChange={(e) => setFilters({...filters, category: e.target.value})}
+                className="bg-bg border border-border text-xs font-bold rounded-lg px-3 py-2 text-text-muted hover:text-text focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all cursor-pointer"
+              >
+                <option value="all">All Categories</option>
+                <option value="work">Work</option>
+                <option value="personal">Personal</option>
+                <option value="groceries">Groceries</option>
+                <option value="academic">Academic</option>
+                <option value="other">Other</option>
+              </select>
               <select 
                 value={filters.status} 
                 onChange={(e) => setFilters({...filters, status: e.target.value})}
@@ -174,7 +203,7 @@ export default function TasksTab({ tasks, fetchDashboardData }) {
           ) : filteredTasks.length === 0 ? (
             <div className="p-16 text-center">
               <p className="text-text-muted font-bold text-lg mb-4">No tasks match your filters.</p>
-              <button onClick={() => setFilters({ status: 'all', risk: 'all', timeframe: 'all' })} className="text-sm font-bold text-primary hover:text-primary/80 transition-colors">Clear all filters</button>
+              <button onClick={() => setFilters({ status: 'active', risk: 'all', timeframe: 'all', category: 'all', searchQuery: '' })} className="text-sm font-bold text-primary hover:text-primary/80 transition-colors">Clear all filters</button>
             </div>
           ) : (
             filteredTasks.map(task => {

@@ -4,7 +4,7 @@ export default function TaskForm({ onTaskAdded }) {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    category: 'other',
+    category: 'Work',
     deadline: '',
     estimatedHours: '',
     priority: 'medium'
@@ -27,7 +27,7 @@ export default function TaskForm({ onTaskAdded }) {
       if (res.ok) {
         const newTask = await res.json();
         onTaskAdded(newTask);
-        setFormData({ title: '', description: '', category: 'other', deadline: '', estimatedHours: '', priority: 'medium' });
+        setFormData({ title: '', description: '', category: 'Work', deadline: '', estimatedHours: '', priority: 'medium' });
       }
     } catch (error) {
       console.error('Failed to create task:', error);
@@ -59,13 +59,11 @@ export default function TaskForm({ onTaskAdded }) {
           </div>
         </div>
         <select name="category" value={formData.category} onChange={handleChange} className="rounded-md border border-border bg-bg p-2 text-text">
-          <option value="assignment">Assignment</option>
-          <option value="exam">Exam</option>
-          <option value="project">Project</option>
-          <option value="meeting">Meeting</option>
-          <option value="coding">Coding</option>
-          <option value="personal">Personal</option>
-          <option value="other">Other</option>
+          <option value="Work">Work</option>
+          <option value="Personal">Personal</option>
+          <option value="Groceries">Groceries</option>
+          <option value="Academic">Academic</option>
+          <option value="Other">Other</option>
         </select>
         <select name="priority" value={formData.priority} onChange={handleChange} className="rounded-md border border-border bg-bg p-2 text-text">
           <option value="low">Low Priority</option>

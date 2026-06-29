@@ -25,6 +25,11 @@ const taskSchema = new mongoose.Schema({
     default: 'pending',
     required: true
   },
+  category: {
+    type: String,
+    enum: ['Work', 'Personal', 'Groceries', 'Academic', 'Other'],
+    default: 'Work'
+  },
   riskScore: { type: Number, default: 0, min: 0, max: 100 },
   completionProbability: { type: Number, default: 100, min: 0, max: 100 },
   subTasks: [{

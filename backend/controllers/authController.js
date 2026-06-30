@@ -4,14 +4,15 @@ const bcrypt = require('bcryptjs');
 const { z } = require('zod');
 const User = require('../models/User');
 
-const client = new OAuth2Client(process.env.GOOGLE_OAUTH_CLIENT_ID);
+const googleClientId = process.env.GOOGLE_OAUTH_CLIENT_ID || '790052168332-frjkt93h5f5ptin93vrjecauqgonkm3o.apps.googleusercontent.com';
+const client = new OAuth2Client(googleClientId);
 
 const googleLogin = async (req, res) => {
   const { credential } = req.body;
   try {
     const ticket = await client.verifyIdToken({
       idToken: credential,
-      audience: process.env.GOOGLE_OAUTH_CLIENT_ID,
+      audience: googleClientId,
     });
     
     const payload = ticket.getPayload();

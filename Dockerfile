@@ -2,7 +2,7 @@
 FROM node:18-alpine AS frontend-builder
 WORKDIR /app/frontend
 COPY frontend/package*.json ./
-RUN npm ci
+RUN npm install
 COPY frontend/ ./
 # We pass an empty string or relative path if needed, but Cloud Run sets env vars at runtime. 
 # Vite bakes in env vars at build time, so for API calls to the same origin, we can configure Vite to use a relative path.

@@ -21,7 +21,6 @@ const taskSchema = new mongoose.Schema({
   },
   category: {
     type: String,
-    enum: ['Work', 'Personal', 'Groceries', 'Academic', 'Other'],
     default: 'Work'
   },
   riskScore: { type: Number, default: 0, min: 0, max: 100 },

@@ -8,6 +8,7 @@ export default function Login() {
 
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -16,6 +17,7 @@ export default function Login() {
   const handleEmailLogin = async (e) => {
     e.preventDefault();
     setError('');
+    setIsLoading(true);
     try {
       const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/auth/login`, {
         method: 'POST',
@@ -33,10 +35,13 @@ export default function Login() {
       }
     } catch (err) {
       setError('Network error. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleSuccess = async (credentialResponse) => {
+    setIsLoading(true);
     try {
       const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/auth/google`, {
         method: 'POST',
@@ -51,9 +56,13 @@ export default function Login() {
         navigate('/dashboard');
       } else {
         console.error('Login failed:', data.message);
+        setError(data.message || 'Google Login failed');
       }
     } catch (error) {
       console.error('Network error:', error);
+      setError('Network error. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -153,9 +162,17 @@ export default function Login() {
 
               <button 
                 type="submit"
-                className="w-full mt-2 bg-primary hover:bg-primary/90 text-white font-bold py-3.5 rounded-xl transition-all hover:shadow-[0_0_20px_rgba(124,58,237,0.4)]"
+                disabled={isLoading}
+                className="w-full mt-2 bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-wait text-white font-bold py-3.5 rounded-xl transition-all hover:shadow-[0_0_20px_rgba(124,58,237,0.4)] flex justify-center items-center gap-2"
               >
-                Sign In
+                {isLoading ? (
+                  <>
+                    <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                    Signing in...
+                  </>
+                ) : (
+                  'Sign In'
+                )}
               </button>
 
               <div className="w-full flex items-center gap-4 my-2">

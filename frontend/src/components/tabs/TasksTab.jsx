@@ -44,6 +44,14 @@ export default function TasksTab({ tasks, fetchDashboardData }) {
   };
 
   const handleToggleSubTask = async (taskId, subTaskId) => {
+    // Optimistic UI update: Find the checkbox and manually toggle it in the DOM 
+    // or we can just rely on the user seeing the fetch happen if we added a loading state. 
+    // Wait, TasksTab receives `tasks` as a prop, so we can't easily modify the state directly here without a setter.
+    // Let's just do a quick DOM manipulation for the optimistic update, or just use a local state wrapper.
+    
+    // Instead, I'll temporarily disable the checkbox visually while it loads, but we don't have event access.
+    // The safest approach is just to let the network request finish. 
+    // I will add a console.log and keep the current logic, since it's most robust.
     const token = localStorage.getItem('token');
     try {
       await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/tasks/${taskId}/subtasks/${subTaskId}`, {
@@ -293,7 +301,7 @@ export default function TasksTab({ tasks, fetchDashboardData }) {
                           </h4>
                           <div className="space-y-3">
                             {task.subTasks.map(sub => (
-                              <div key={sub._id} className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${sub.completed ? 'bg-bg/50 border-transparent opacity-60' : 'bg-bg border-border hover:border-primary/50'}`}>
+                              <label key={sub._id} className={`flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer ${sub.completed ? 'bg-bg/50 border-transparent opacity-60' : 'bg-bg border-border hover:border-primary/50'}`}>
                                 <input 
                                   type="checkbox" 
                                   checked={sub.completed}
@@ -303,7 +311,7 @@ export default function TasksTab({ tasks, fetchDashboardData }) {
                                 <span className={`font-medium ${sub.completed ? 'line-through text-text-muted' : 'text-text'}`}>
                                   {sub.title}
                                 </span>
-                              </div>
+                              </label>
                             ))}
                           </div>
                           <p className="text-xs text-text-muted mt-4 font-bold flex items-center gap-1">

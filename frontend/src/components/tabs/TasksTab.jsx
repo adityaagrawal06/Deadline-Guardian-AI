@@ -4,6 +4,38 @@ import AgentDiscussionTimeline from '../AgentDiscussionTimeline';
 import ProofUpload from '../ProofUpload';
 import TaskForm from '../TaskForm';
 
+const SubTaskRow = ({ task, sub, handleToggleSubTask }) => {
+  const [optimisticCompleted, setOptimisticCompleted] = useState(sub.completed);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    setOptimisticCompleted(sub.completed);
+    setIsLoading(false);
+  }, [sub.completed]);
+
+  const handleChange = async () => {
+    if (isLoading) return;
+    setOptimisticCompleted(!optimisticCompleted);
+    setIsLoading(true);
+    await handleToggleSubTask(task._id, sub._id);
+  };
+
+  return (
+    <label className={`flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer ${optimisticCompleted ? 'bg-bg/50 border-transparent opacity-60' : 'bg-bg border-border hover:border-primary/50'} ${isLoading ? 'opacity-70 cursor-wait' : ''}`}>
+      <input 
+        type="checkbox" 
+        checked={optimisticCompleted}
+        onChange={handleChange}
+        disabled={isLoading}
+        className="w-5 h-5 rounded border-border text-primary focus:ring-primary/20 cursor-pointer disabled:cursor-wait"
+      />
+      <span className={`font-medium transition-all ${optimisticCompleted ? 'line-through text-text-muted' : 'text-text'}`}>
+        {sub.title}
+      </span>
+    </label>
+  );
+};
+
 export default function TasksTab({ tasks, fetchDashboardData }) {
   const [nowDate, setNowDate] = useState(new Date());
   const [filters, setFilters] = useState({ status: 'active', risk: 'all', timeframe: 'all', category: 'all', searchQuery: '' });
@@ -44,14 +76,6 @@ export default function TasksTab({ tasks, fetchDashboardData }) {
   };
 
   const handleToggleSubTask = async (taskId, subTaskId) => {
-    // Optimistic UI update: Find the checkbox and manually toggle it in the DOM 
-    // or we can just rely on the user seeing the fetch happen if we added a loading state. 
-    // Wait, TasksTab receives `tasks` as a prop, so we can't easily modify the state directly here without a setter.
-    // Let's just do a quick DOM manipulation for the optimistic update, or just use a local state wrapper.
-    
-    // Instead, I'll temporarily disable the checkbox visually while it loads, but we don't have event access.
-    // The safest approach is just to let the network request finish. 
-    // I will add a console.log and keep the current logic, since it's most robust.
     const token = localStorage.getItem('token');
     try {
       await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/tasks/${taskId}/subtasks/${subTaskId}`, {
@@ -301,17 +325,7 @@ export default function TasksTab({ tasks, fetchDashboardData }) {
                           </h4>
                           <div className="space-y-3">
                             {task.subTasks.map(sub => (
-                              <label key={sub._id} className={`flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer ${sub.completed ? 'bg-bg/50 border-transparent opacity-60' : 'bg-bg border-border hover:border-primary/50'}`}>
-                                <input 
-                                  type="checkbox" 
-                                  checked={sub.completed}
-                                  onChange={() => handleToggleSubTask(task._id, sub._id)}
-                                  className="w-5 h-5 rounded border-border text-primary focus:ring-primary/20 cursor-pointer"
-                                />
-                                <span className={`font-medium ${sub.completed ? 'line-through text-text-muted' : 'text-text'}`}>
-                                  {sub.title}
-                                </span>
-                              </label>
+                              <SubTaskRow key={sub._id} task={task} sub={sub} handleToggleSubTask={handleToggleSubTask} />
                             ))}
                           </div>
                           <p className="text-xs text-text-muted mt-4 font-bold flex items-center gap-1">

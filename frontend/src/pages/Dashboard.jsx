@@ -603,41 +603,57 @@ export default function Dashboard() {
             <div className="bg-gradient-to-r from-primary to-indigo-500 p-4 flex justify-between items-center text-white">
               <h3 className="font-bold text-sm flex items-center gap-2"><Sparkles size={16} /> AI Executive Summary</h3>
               <span className="text-[9px] uppercase tracking-wider bg-black/20 px-2 py-0.5 rounded-full backdrop-blur-sm flex items-center gap-1">
-                <Activity size={10} /> Updated just now
+                <Activity size={10} /> Live Data
               </span>
             </div>
             <div className="bg-surface p-5 flex flex-col gap-4">
-              <div className="flex items-center gap-3 border-b border-border pb-4">
-                <span className="text-xs font-bold text-text-muted">Overall Status</span>
-                <span className="text-xs font-bold bg-orange-100 text-orange-700 px-2.5 py-1 rounded-full">At Risk</span>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-[10px] text-text-muted mb-1">Completion Probability</p>
-                  <p className="text-xl font-bold text-primary">62%</p>
-                </div>
-                <div>
-                  <p className="text-[10px] text-text-muted mb-1">Deadline Urgency</p>
-                  <p className="text-sm font-bold text-red-500 mt-1">High</p>
-                </div>
-                <div>
-                  <p className="text-[10px] text-text-muted mb-1">Most Critical Action</p>
-                  <p className="text-xs font-medium text-text mt-1 leading-tight">Start next assignment today</p>
-                </div>
-                <div>
-                  <p className="text-[10px] text-text-muted mb-1">Recommended Start</p>
-                  <p className="text-xs font-medium text-text mt-1">Today</p>
-                </div>
-                <div>
-                  <p className="text-[10px] text-text-muted mb-1">Expected Completion</p>
-                  <p className="text-xs font-medium text-text mt-1">Tomorrow</p>
-                </div>
-                <div>
-                  <p className="text-[10px] text-text-muted mb-1">AI Confidence</p>
-                  <p className="text-xl font-bold text-primary">92%</p>
-                </div>
-              </div>
+              {(() => {
+                const activeTasksList = tasks.filter(t => t.status !== 'completed' && t.status !== 'missed');
+                const mostCritical = activeTasksList.length > 0 ? [...activeTasksList].sort((a,b) => b.riskScore - a.riskScore)[0] : null;
+                const avgRisk = summary?.averageRisk || 0;
+                
+                return (
+                  <>
+                    <div className="flex items-center gap-3 border-b border-border pb-4">
+                      <span className="text-xs font-bold text-text-muted">Overall Status</span>
+                      <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${avgRisk > 70 ? 'bg-red-100 text-red-700' : avgRisk > 30 ? 'bg-orange-100 text-orange-700' : 'bg-green-100 text-green-700'}`}>
+                        {avgRisk > 70 ? 'At Risk' : avgRisk > 30 ? 'Needs Attention' : 'On Track'}
+                      </span>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-[10px] text-text-muted mb-1">Completion Probability</p>
+                        <p className="text-xl font-bold text-primary">{Math.max(0, 100 - Math.floor(avgRisk))}%</p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] text-text-muted mb-1">Deadline Urgency</p>
+                        <p className={`text-sm font-bold mt-1 ${mostCritical?.riskScore > 70 ? 'text-red-500' : mostCritical?.riskScore > 30 ? 'text-orange-500' : 'text-green-500'}`}>
+                          {mostCritical?.riskScore > 70 ? 'Critical' : mostCritical?.riskScore > 30 ? 'High' : mostCritical ? 'Normal' : 'None'}
+                        </p>
+                      </div>
+                      <div className="col-span-2">
+                        <p className="text-[10px] text-text-muted mb-1">Most Critical Action</p>
+                        <p className="text-xs font-medium text-text mt-1 leading-tight truncate">
+                          {mostCritical ? `Prioritize: ${mostCritical.title}` : 'All caught up! Relax.'}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] text-text-muted mb-1">Recommended Start</p>
+                        <p className="text-xs font-medium text-text mt-1">
+                          {mostCritical?.riskScore > 70 ? 'Immediately' : mostCritical ? 'Today' : 'N/A'}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] text-text-muted mb-1">Next Deadline</p>
+                        <p className="text-xs font-medium text-text mt-1">
+                          {mostCritical ? new Date(mostCritical.deadline).toLocaleDateString(undefined, {month: 'short', day: 'numeric'}) : 'N/A'}
+                        </p>
+                      </div>
+                    </div>
+                  </>
+                );
+              })()}
             </div>
           </div>
 

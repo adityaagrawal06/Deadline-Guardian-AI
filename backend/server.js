@@ -47,7 +47,7 @@ app.get('/api/health', (req, res) => {
 });
 
 // Catch-all route to serve React app for non-API requests
-app.get('*', (req, res) => {
+app.get(/.*/, (req, res) => {
   res.sendFile(path.join(frontendBuildPath, 'index.html'));
 });
 

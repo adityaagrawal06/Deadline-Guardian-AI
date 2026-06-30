@@ -4,12 +4,6 @@ const taskSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   title: { type: String, required: true },
   description: { type: String },
-  category: { 
-    type: String, 
-    enum: ['assignment', 'exam', 'project', 'meeting', 'coding', 'personal', 'other'],
-    default: 'other',
-    required: true 
-  },
   deadline: { type: Date, required: true },
   estimatedHours: { type: Number, required: true },
   actualHours: { type: Number, default: 0 },
